@@ -27,6 +27,13 @@
 #define pb2 10
 #define pb3 9
 
+// ตัวแปรสำหรับเก็บสถานะปุ่ม
+int buttonState = 0;
+int lastButtonState = 0;
+
+// ตัวแปรสำหรับเก็บสถานะการทำงานของมอเตอร์
+boolean motorRunning = false;
+
 // #define DOUT  10
 // #define CLK   9
 
@@ -65,8 +72,6 @@ void setup() {
   pinMode(MOTOR_Y_ENABLE_PIN, OUTPUT);
   stepper.setEnablePin(MOTOR_Y_ENABLE_PIN);
   stepper.setPinsInverted(false, false, true);
-  stepper.setAcceleration(1000);  
-  stepper.setMaxSpeed(4000);
   //stepper.setSpeed(100);
   stepper.setCurrentPosition(0);
   stepper.enableOutputs();
@@ -74,31 +79,36 @@ void setup() {
 }
 
 void loop() {
+  // int speedMotor = analogRead(A0);
+  // int accMotor = analogRead(A1);
+  // int steepMotor = analogRead(A2);
+  // Serial.print("speedMotor "); Serial.println(speedMotor);
+  // Serial.print("accMotor "); Serial.println(accMotor);
+  // Serial.print("steepMotor "); Serial.println(steepMotor);
+  // delay(1000);
+  stepper.setAcceleration(1000);  // min= max=
+  stepper.setMaxSpeed(2000); // min=500 max=5000
 
-  if (!digitalRead(pb1)){
-    stepper.moveTo(5000); //500 = 10mm
-    // stepper.move(30);
-    stepper.run();
+  // อ่านสถานะปุ่ม
+  buttonState = digitalRead(pb1);
+  // ถ้าปุ่มถูกกด
+  if (buttonState != lastButtonState && buttonState == LOW) {
+    // หาก Stepper Motor ไม่ได้ทำงาน
+    if (!stepper.isRunning()) {
+      // เลื่อน Stepper Motor ไปทางที่ต้องการ (500 steps)
+      stepper.moveTo(125*100); //500 = 4CM, 125 = 1CM
+    }
   }
-  if (!digitalRead(pb2)){
-    stepper.moveTo(0); //500 = 10mm
-    stepper.run();
-  }
-    if (!digitalRead(pb3)){
+
+  // ทำงานของ Stepper Motor
+  stepper.run();
+
+  // หาก Stepper Motor ได้ทำงานเสร็จสิ้น
+  if (stepper.distanceToGo() == 0) {
+    // หยุด Stepper Motor
+    stepper.stop();
     stepper.setCurrentPosition(0);
   }
 
-  // stepper.move(30)
-  // stepper.run();
-
-  // int analog_in = analogRead(ANALOG_IN);
-  // int pot = map(analog_in,0,1023,0,400);
-  // Serial.println(analog_in);
-  // // stepper.setSpeed(100);
-  // stepper.moveTo(500); //500 = 10mm
-  // stepper.run();
-  // stepper.moveTo(0);
-  // stepper.runToPosition();
-  // Serial.println(stepper.currentPosition());
-  
+  lastButtonState = buttonState;
 }
