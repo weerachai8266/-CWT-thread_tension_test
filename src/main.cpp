@@ -79,15 +79,16 @@ void setup() {
 }
 
 void loop() {
-  // int speedMotor = analogRead(A0);
-  // int accMotor = analogRead(A1);
-  // int steepMotor = analogRead(A2);
+  int speedMotor =  map(analogRead(A0),0,1023,1,5);
+  int accMotor = map(analogRead(A1),0,1023,1,5);
+  int steepMotor = map(analogRead(A2),0,1023,10,200);
   // Serial.print("speedMotor "); Serial.println(speedMotor);
   // Serial.print("accMotor "); Serial.println(accMotor);
   // Serial.print("steepMotor "); Serial.println(steepMotor);
   // delay(1000);
-  stepper.setAcceleration(1000);  // min= max=
-  stepper.setMaxSpeed(2000); // min=500 max=5000
+
+  stepper.setAcceleration(500*accMotor);  // min= max=
+  stepper.setMaxSpeed(1000*speedMotor); // min=500 max=5000
 
   // อ่านสถานะปุ่ม
   buttonState = digitalRead(pb1);
@@ -96,7 +97,7 @@ void loop() {
     // หาก Stepper Motor ไม่ได้ทำงาน
     if (!stepper.isRunning()) {
       // เลื่อน Stepper Motor ไปทางที่ต้องการ (500 steps)
-      stepper.moveTo(125*100); //500 = 4CM, 125 = 1CM
+      stepper.moveTo(125*steepMotor); //500 = 4CM, 125 = 1CM
     }
   }
 
